@@ -5,8 +5,9 @@ Setup
 ----------
 Unfortunately this does not work with Jenkins out-of-the-box.
 Here are the steps you need to take in order to make this work.
-1. Apply CORS-Headers
-2. (if downloading from an external source (eg. CDN)) add artifact information to the build description
+
+1. Apply CORS-Headers 
+2. (if downloading from an external source (eg. CDN)) add artifact information to the build description 
 
 
 ### 1. Apply CORS-Headers
