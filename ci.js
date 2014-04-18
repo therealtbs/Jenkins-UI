@@ -1,13 +1,39 @@
 // Change this to reflect your environment
-var jenkinsPath = 'http://ci.therealtbs.me';
-var loadFromExternal = true;
-var externalUri = 'http://builds.therealtbs.me/';
+var jenkinsPath = 'http://ci.therealtbs.me',
+loadFromExternal = true,
+externalUri = 'http://builds.therealtbs.me/';
 
 $(function () {
+    $("select").hide();
+    $.get("http://api.bootswatch.com/3/", function (data) {
+        var themes = data.themes,
+        select = $("select");
+        select.show();
+
+
+        themes.forEach(function(value, index){
+            select.append($("<option />")
+                .val(index)
+                .text(value.name));
+        });
+        $.each(themes, function(nr, val) {
+            if (val.name === 'Yeti') {
+                select.val(nr);
+            }
+        });
+        select.change(function(){
+            var theme = themes[$(this).val()];
+            $("#style").attr("href", theme.cssCdn);
+
+        }).change();
+
+    }, "json").fail(function(){
+
+    });
     if (loadFromExternal) {
         $.getJSON(jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]]', function (data) {
             $('#content').empty();
-            var lines = [];
+
             for (var i = 0; i < (data.jobs.length / 2); i++) {
                 $('#content').append('<div class="row"></div>')
             }
@@ -39,7 +65,6 @@ $(function () {
     } else {
         $.getJSON(jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]]', function (data) {
             $('#content').empty();
-            var lines = [];
             for (var i = 0; i < (data.jobs.length / 2); i++) {
                 $('#content').append('<div class="row"></div>')
             }
@@ -142,14 +167,14 @@ function getDownloadButton(build, job) {
     if (loadFromExternal && $.parseJSON(build.description).artifacts.length == 0) return 'No download links available';
     if (loadFromExternal) {
         var html = $('<button>', {
-            class: 'btn btn-primary btn-xs',
-            onclick: 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + build.description + '\', "' + job.name + '")'
+            'class': 'btn btn-primary btn-xs',
+            'onclick': 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + build.description + '\', "' + job.name + '")'
         }).text('Download links');
         return html.wrap('<p>').parent().html();
     } else {
         var html = $('<button>', {
-            class: 'btn btn-primary btn-xs',
-            onclick: 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + JSON.stringify(build.artifacts) + '\', "' + job.name + '")'
+            'class': 'btn btn-primary btn-xs',
+            'onclick': 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + JSON.stringify(build.artifacts) + '\', "' + job.name + '")'
         }).text('Download links');
         return html.wrap('<p>').parent().html();
     }

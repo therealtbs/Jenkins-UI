@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <title>TBS Builds</title>
-    <link href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/yeti/bootstrap.min.css" rel="stylesheet">
+    <link id="style" href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/yeti/bootstrap.min.css" rel="stylesheet">
     <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
     <style>
         #content {
@@ -27,9 +27,24 @@
     </div>
 </div>
 
+<div class="modal" id="themeSelect">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                <h4 class="modal-title">Change your theme (powered by <a href="http://bootswatch.com/">Bootswatch</a>)</h4>
+            </div>
+            <div class="modal-body">
+                <select class="form-control"></select>
+            </div>
+
+        </div>
+    </div>
+</div>
 <div class="container" id="content">
 <center><i class="fa fa-spinner fa-5x fa-spin"></i></center>
 </div>
+<button class="btn btn-primary" data-toggle="modal" data-target="#themeSelect">Change Theme</button>
 <a href="https://github.com/therealtbs/Jenkins-UI"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
 <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
