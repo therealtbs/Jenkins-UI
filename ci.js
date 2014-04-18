@@ -1,6 +1,9 @@
+// Change this to reflect your environment
+var jenkinsPath = 'http://ci.therealtbs.me';
+
 
 $(function () {
-    $.getJSON('http://ci.therealtbs.me/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]]', function(data) {
+    $.getJSON(jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]]', function(data) {
         $('#content').empty();
         var lines = [];
         for (var i = 0; i<(data.jobs.length/2); i++) {
