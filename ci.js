@@ -27,6 +27,9 @@ $(function () {
                 }
             });
         });
+    }).fail(function() {
+        $('#content').empty();
+        $('#content').append('<div class="alert alert-danger">Could not retrieve Information</div>')
     });
 
 });
