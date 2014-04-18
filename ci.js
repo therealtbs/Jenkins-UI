@@ -16,17 +16,28 @@ $(function () {
                 .val(index)
                 .text(value.name));
         });
-        $.each(themes, function(nr, val) {
-            if (val.name === 'Yeti') {
-                select.val(nr);
-            }
-        });
+
         select.change(function(){
             var theme = themes[$(this).val()];
             $("#style").attr("href", theme.cssCdn);
-
-        }).change();
-
+            if(typeof(Storage)!=="undefined") {
+                localStorage.lastTheme = theme.name;
+            }
+        });
+        if(typeof(Storage)!=="undefined" && localStorage.lastTheme != undefined) {
+            themes.forEach(function(val, nr) {
+                if (localStorage.lastTheme === val.name) {
+                    select.val(nr);
+                }
+            })
+        } else {
+            $.each(themes, function(nr, val) {
+                if (val.name === 'Yeti') {
+                    select.val(nr);
+                }
+            });
+        }
+        select.change();
     }, "json").fail(function(){
 
     });
