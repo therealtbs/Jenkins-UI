@@ -101,7 +101,7 @@ function getTableRows(builds, job, limit) {
 function formatChangeSet(changeSet) {
     var html = '<ol>';
     $.each(changeSet, function (i, change) {
-        html += '<li>' + change.msg + '</li>';
+        html += $('<li></li>').text(change.msg).wrap('<p>').parent().html();
     });
     return html + '</ol>';
 }
