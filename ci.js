@@ -121,7 +121,7 @@ function getTableClass(result) {
 }
 function getDownloadButton(build, job) {
     if (build.result !== "SUCCESS") return 'No download links available';
-    if (build.description === null) return 'No download links available';
+    if (loadFromExternal && build.description === null) return 'No download links available';
 
     if (loadFromExternal && $.parseJSON(build.description).artifacts.length == 0) return 'No download links available';
     if (loadFromExternal) {
