@@ -1,112 +1,59 @@
 // Change this to reflect your environment
-var jenkinsPath = 'http://ci.therealtbs.me',
-loadFromExternal = true,
-externalUri = 'http://builds.therealtbs.me/';
+var jenkinsPath = 'http://ci.therealtbs.me', // This should point to the root of your Jenkins installation
+    loadFromExternal = true, // If you are sending your artifacts to a different server (eg. CDN) than your Jenkins installation, set this to true
+    externalUri = 'http://builds.therealtbs.me/', // If the above is true, set it's URL here
+    useCredentials = true; // Should we send session cookies with our requests?
 
 $(function () {
     $("select").hide();
+
     $.get("http://api.bootswatch.com/3/", function (data) {
         var themes = data.themes,
-        select = $("select");
+            select = $("select");
         select.show();
 
 
-        themes.forEach(function(value, index){
+        themes.forEach(function (value, index) {
             select.append($("<option />")
                 .val(index)
                 .text(value.name));
         });
 
-        select.change(function(){
+        select.change(function () {
             var theme = themes[$(this).val()];
             $("#style").attr("href", theme.cssCdn);
-            if(typeof(Storage)!=="undefined") {
+            if (typeof(Storage) !== "undefined") {
                 localStorage.lastTheme = theme.name;
             }
         });
-        if(typeof(Storage)!=="undefined" && localStorage.lastTheme != undefined) {
-            themes.forEach(function(val, nr) {
+        if (typeof(Storage) !== "undefined" && localStorage.lastTheme != undefined) {
+            themes.forEach(function (val, nr) {
                 if (localStorage.lastTheme === val.name) {
                     select.val(nr);
                 }
             })
         } else {
-            $.each(themes, function(nr, val) {
+            $.each(themes, function (nr, val) {
                 if (val.name === 'Yeti') {
                     select.val(nr);
                 }
             });
         }
         select.change();
-    }, "json").fail(function(){
-
-    });
-    if (loadFromExternal) {
-        $.getJSON(jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]]', function (data) {
-            $('#content').empty();
-
-            for (var i = 0; i < (data.jobs.length / 2); i++) {
-                $('#content').append('<div class="row"></div>')
-            }
-            data.jobs.forEach(function (i) {
-                var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
-                html += '<div class="panel-heading"><span class="panel-title">' + i.displayName + '</span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
-                html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
-                if (i.lastSuccessfulBuild !== null && i.lastSuccessfulBuild.description !== null) {
-                    var artifacts = $.parseJSON(i.lastSuccessfulBuild.description).artifacts;
-
-                    artifacts.forEach(function (artifact) {
-                        html += '<a class="btn btn-primary" href="' + externalUri + i.name + '/' + i.lastSuccessfulBuild.number + '/' + artifact + '">Download <br class="visible-lg"/>' + artifact + '<br class="visible-lg"/> (latest)</a>';
-                    });
-
-                }
-                html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
-                html += '</div></div>';
-                $('#content .row').each(function (nr, i) {
-                    if ($(this).length != 2) {
-                        $(this).append(html);
-                        return false;
-                    }
-                });
-            });
-        }).fail(function () {
-            $('#content').empty();
-            $('#content').append('<div class="alert alert-danger">Could not retrieve Information</div>')
-        });
+    }, "json");
+    if (location.hash === '') {
+        getOverview();
     } else {
-        $.getJSON(jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]]', function (data) {
-            $('#content').empty();
-            for (var i = 0; i < (data.jobs.length / 2); i++) {
-                $('#content').append('<div class="row"></div>')
-            }
-            data.jobs.forEach(function (i) {
-                var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
-                html += '<div class="panel-heading"><span class="panel-title">' + i.displayName + '</span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
-                html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
-                if (i.lastSuccessfulBuild !== null) {
-                    var artifacts = i.lastSuccessfulBuild.artifacts;
-
-                    artifacts.forEach(function (artifact) {
-                        html += '<a class="btn btn-primary" href="' + jenkinsPath + '/job/' + i.name + '/' + i.lastSuccessfulBuild.number + '/artifact/' + artifact.relativePath + '">Download <br class="visible-lg"/>' + artifact.fileName + '<br class="visible-lg"/> (latest)</a>';
-                    });
-
-                }
-                html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
-                html += '</div></div>';
-                $('#content .row').each(function (nr, i) {
-                    if ($(this).length != 2) {
-                        $(this).append(html);
-                        return false;
-                    }
-                });
-            });
-        }).fail(function () {
-            $('#content').empty();
-            $('#content').append('<div class="alert alert-danger">Could not retrieve Information</div>')
-        });
+        getHashSpecific(location.hash.replace('#!', ''));
     }
-
-
+    $(window).on('hashchange', function () {
+        if (location.hash === '') {
+            getOverview();
+        } else {
+            getHashSpecific(location.hash.replace('#!', ''));
+        }
+        $("html, body").animate({ scrollTop: 0 }, "slow");
+    });
 });
 
 function getClass(color) {
@@ -141,11 +88,12 @@ function getInfo(color) {
     }
 
 }
-function getTableRows(builds, job) {
+function getTableRows(builds, job, limit) {
+    limit =  typeof limit !== 'undefined' ?  limit : true;
     var html = "";
     var nr = 0;
     $.each(builds, function (i, build) {
-        if (nr++ > 10) return false;
+        if (nr++ > 10 && limit) return false;
         html += '<tr class="' + getTableClass(build.result) + '"><td>' + build.number + '</td><td>' + formatChangeSet(build.changeSet.items) + '</td><td>' + getDownloadButton(build, job) + '</td></tr>';
     });
     return html;
@@ -213,4 +161,163 @@ function listDownloadLinks(artifacts, name, number) {
 
     });
     return html;
+}
+
+function getOverview() {
+    $('#overviewBtn').hide();
+    if (loadFromExternal) {
+        $.ajax({
+            dataType: "json",
+            url: jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]]',
+            success: function (data) {
+            $('#content').empty();
+
+            for (var i = 0; i < (data.jobs.length / 2); i++) {
+                $('#content').append('<div class="row"></div>')
+            }
+            data.jobs.forEach(function (i) {
+                var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
+                html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
+                html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
+                if (i.lastSuccessfulBuild !== null && i.lastSuccessfulBuild.description !== null) {
+                    var artifacts = $.parseJSON(i.lastSuccessfulBuild.description).artifacts;
+
+                    artifacts.forEach(function (artifact) {
+                        html += '<a class="btn btn-primary" href="' + externalUri + i.name + '/' + i.lastSuccessfulBuild.number + '/' + artifact + '">Download <br class="visible-lg"/>' + artifact + '<br class="visible-lg"/> (latest)</a>';
+                    });
+
+                }
+                html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
+                html += '</div></div>';
+                $('#content .row').each(function (nr, i) {
+                    if ($(this).length != 2) {
+                        $(this).append(html);
+                        return false;
+                    }
+                });
+            });
+        },
+            fail: function () {
+                $('#content').empty();
+                $('#content').append('<div class="alert alert-danger">Could not retrieve information</div>')
+            },
+            xhrFields: {
+                withCredentials: useCredentials
+            }
+        });
+    } else {
+        $.ajax({
+            dataType: "json",
+            url: jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]]',
+            success: function (data) {
+                $('#content').empty();
+                for (var i = 0; i < (data.jobs.length / 2); i++) {
+                    $('#content').append('<div class="row"></div>')
+                }
+                data.jobs.forEach(function (i) {
+                    var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
+                    html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
+                    html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
+                    if (i.lastSuccessfulBuild !== null) {
+                        var artifacts = i.lastSuccessfulBuild.artifacts;
+
+                        artifacts.forEach(function (artifact) {
+                            html += '<a class="btn btn-primary" href="' + jenkinsPath + '/job/' + i.name + '/' + i.lastSuccessfulBuild.number + '/artifact/' + artifact.relativePath + '">Download <br class="visible-lg"/>' + artifact.fileName + '<br class="visible-lg"/> (latest)</a>';
+                        });
+
+                    }
+                    html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
+                    html += '</div></div>';
+                    $('#content .row').each(function (nr, i) {
+                        if ($(this).length != 2) {
+                            $(this).append(html);
+                            return false;
+                        }
+                    });
+                });
+            },
+            fail: function () {
+                $('#content').empty();
+                $('#content').append('<div class="alert alert-danger">Could not retrieve information</div>')
+            },
+            xhrFields: {
+                withCredentials: useCredentials
+            }
+        });
+    }
+}
+
+function getHashSpecific(hashcode) {
+    $('#overviewBtn').show();
+    if (loadFromExternal) {
+        $.ajax({
+            dataType: "json",
+            url: jenkinsPath + '/job/' + hashcode + '/api/json?tree=name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]',
+            success: function (data) {
+                $('#content').empty();
+
+
+                var i = data;
+                var html = '<div class="panel ' + getClass(i.color) + '">';
+                html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
+                html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
+                if (i.lastSuccessfulBuild !== null && i.lastSuccessfulBuild.description !== null) {
+                    var artifacts = $.parseJSON(i.lastSuccessfulBuild.description).artifacts;
+
+                    artifacts.forEach(function (artifact) {
+                        html += '<a class="btn btn-primary" href="' + externalUri + i.name + '/' + i.lastSuccessfulBuild.number + '/' + artifact + '">Download <br class="visible-lg"/>' + artifact + '<br class="visible-lg"/> (latest)</a>';
+                    });
+
+                }
+                html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i, false) + '</tbody></table>';
+                html += '</div>';
+                $('#content').append(html);
+
+            },
+            fail: function () {
+                $('#content').empty();
+                $('#content').append('<div class="alert alert-danger">Could not retrieve information</div>')
+            },
+            xhrFields: {
+                withCredentials: useCredentials
+            }
+        });
+    } else {
+        $.ajax({
+            dataType: "json",
+            url: jenkinsPath + '/job/' + hashcode + '/api/json?tree=name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]',
+            success: function (data) {
+                $('#content').empty();
+
+                var i = data;
+                var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
+                html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
+                html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
+                if (i.lastSuccessfulBuild !== null) {
+                    var artifacts = i.lastSuccessfulBuild.artifacts;
+
+                    artifacts.forEach(function (artifact) {
+                        html += '<a class="btn btn-primary" href="' + jenkinsPath + '/job/' + i.name + '/' + i.lastSuccessfulBuild.number + '/artifact/' + artifact.relativePath + '">Download <br class="visible-lg"/>' + artifact.fileName + '<br class="visible-lg"/> (latest)</a>';
+                    });
+
+                }
+                html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i, false) + '</tbody></table>';
+                html += '</div></div>';
+                $('#content .row').each(function (nr, i) {
+                    if ($(this).length != 2) {
+                        $(this).append(html);
+                        return false;
+                    }
+                });
+
+            },
+            fail: function () {
+                $('#content').empty();
+                $('#content').append('<div class="alert alert-danger">Could not retrieve information</div>')
+            },
+            xhrFields: {
+                withCredentials: useCredentials
+            }
+        });
+    }
 }
