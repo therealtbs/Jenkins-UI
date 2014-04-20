@@ -190,9 +190,9 @@ function getOverview() {
                     }
                     html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
                     html += '</div></div>';
-                    $('#content').find('.row').each(function (nr, i) {
-                        if ($(this).length != 2) {
-                            $(this).append(html);
+                    $('#content > .row').each(function (nr, i) {
+                        if ($(i).children().length != 2) {
+                            $(i).append(html);
                             return false;
                         }
                     });
@@ -229,7 +229,7 @@ function getOverview() {
                     }
                     html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
                     html += '</div></div>';
-                    $('#content').find('.row').each(function (nr, i) {
+                    $('#content > .row').each(function (nr, i) {
                         if ($(this).length != 2) {
                             $(this).append(html);
                             return false;
