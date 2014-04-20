@@ -186,7 +186,7 @@ function getOverview() {
                     html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
                     html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
                     html += '<h4>Downloads</h4>'
-                        html += getDownloadButton(i.lastSuccessfulBuild, i)
+                    html += getDownloadButton(i.lastSuccessfulBuild, i)
 
                     html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
                     html += '</div></div>';
@@ -219,14 +219,8 @@ function getOverview() {
                     var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
                     html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
                     html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
-                    if (i.lastSuccessfulBuild !== null) {
-                        var artifacts = i.lastSuccessfulBuild.artifacts;
-
-                        artifacts.forEach(function (artifact) {
-                            html += '<a class="btn btn-primary" href="' + jenkinsPath + '/job/' + i.name + '/' + i.lastSuccessfulBuild.number + '/artifact/' + artifact.relativePath + '">Download <br class="visible-lg"/>' + artifact.fileName + '<br class="visible-lg"/> (latest)</a>';
-                        });
-
-                    }
+                    html += '<h4>Downloads</h4>'
+                    html += getDownloadButton(i.lastSuccessfulBuild, i)
                     html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
                     html += '</div></div>';
                     $('#content > .row').each(function (nr, i) {
@@ -262,14 +256,8 @@ function getHashSpecific(hashcode) {
                 var html = '<div class="panel ' + getClass(i.color) + '">';
                 html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
                 html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
-                if (i.lastSuccessfulBuild !== null && i.lastSuccessfulBuild.description !== null) {
-                    var artifacts = $.parseJSON(i.lastSuccessfulBuild.description).artifacts;
-
-                    artifacts.forEach(function (artifact) {
-                        html += '<a class="btn btn-primary" href="' + externalUri + i.name + '/' + i.lastSuccessfulBuild.number + '/' + artifact + '">Download <br class="visible-lg"/>' + artifact + '<br class="visible-lg"/> (latest)</a>';
-                    });
-
-                }
+                html += '<h4>Downloads</h4>'
+                html += getDownloadButton(i.lastSuccessfulBuild, i)
                 html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i, false) + '</tbody></table>';
                 html += '</div>';
                 $('#content').append(html);
@@ -294,14 +282,8 @@ function getHashSpecific(hashcode) {
                 var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
                 html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
                 html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
-                if (i.lastSuccessfulBuild !== null) {
-                    var artifacts = i.lastSuccessfulBuild.artifacts;
-
-                    artifacts.forEach(function (artifact) {
-                        html += '<a class="btn btn-primary" href="' + jenkinsPath + '/job/' + i.name + '/' + i.lastSuccessfulBuild.number + '/artifact/' + artifact.relativePath + '">Download <br class="visible-lg"/>' + artifact.fileName + '<br class="visible-lg"/> (latest)</a>';
-                    });
-
-                }
+                html += '<h4>Downloads</h4>'
+                html += getDownloadButton(i.lastSuccessfulBuild, i)
                 html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i, false) + '</tbody></table>';
                 html += '</div></div>';
                 $('#content .row').each(function (nr, i) {
