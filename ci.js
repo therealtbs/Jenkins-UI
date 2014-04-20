@@ -121,20 +121,25 @@ function getTableClass(result) {
 }
 function getDownloadButton(build, job) {
     var html;
-    if (build.result !== "SUCCESS") return 'No download links available';
+    if (build === null) return 'No download links available';
+    if (build.result !== "SUCCESS" && build.result != undefined) return 'No download links available';
     if (loadFromExternal && build.description === null) return 'No download links available';
 
     if (loadFromExternal && $.parseJSON(build.description).artifacts.length == 0) return 'No download links available';
-    if (loadFromExternal) {
-        html = $('<button>', {
+
+    var artifacts = loadFromExternal ? $.parseJSON(build.description).artifacts : build.artifacts;
+
+
+    if (artifacts.length === 1) {
+        html = $('<a>', {
             'class': 'btn btn-primary btn-xs',
-            'onclick': 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + build.description + '\', "' + job.name + '")'
-        }).text('Download links');
+            'href': externalUri + job.name + '/' + build.number + '/' + (loadFromExternal ? artifacts[0] : artifacts[0].relativePath)
+        }).text(loadFromExternal ? artifacts[0] : artifacts[0].fileName);
 
     } else {
         html = $('<button>', {
             'class': 'btn btn-primary btn-xs',
-            'onclick': 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + JSON.stringify(build.artifacts) + '\', "' + job.name + '")'
+            'onclick': 'showDownloadModal("' + job.displayName + '", "' + build.number + '", \'' + JSON.stringify(artifacts) + '\', "' + job.name + '")'
         }).text('Download links');
 
     }
@@ -180,14 +185,9 @@ function getOverview() {
                     var html = '<div class="col-lg-6"><div class="panel ' + getClass(i.color) + '">';
                     html += '<div class="panel-heading"><span class="panel-title"><a href="#!' + i.name + '">' + i.displayName + '</a></span><i data-toggle="tooltip" data-placement="top" title="' + getInfo(i.color) + '" class="fa fa-question-circle fa-lg pull-right"></i></div>';
                     html += '<div class=panel-body container"><div class="row"><div class="col-md-8">' + i.description + '</div><div class="col-md-4">';
-                    if (i.lastSuccessfulBuild !== null && i.lastSuccessfulBuild.description !== null) {
-                        var artifacts = $.parseJSON(i.lastSuccessfulBuild.description).artifacts;
+                    html += '<h4>Downloads</h4>'
+                        html += getDownloadButton(i.lastSuccessfulBuild, i)
 
-                        artifacts.forEach(function (artifact) {
-                            html += '<a class="btn btn-primary" href="' + externalUri + i.name + '/' + i.lastSuccessfulBuild.number + '/' + artifact + '">Download <br class="visible-lg"/>' + artifact + '<br class="visible-lg"/> (latest)</a>';
-                        });
-
-                    }
                     html += '</div></div><hr/></div><table class="table table-striped table-hover"><thead><tr><td>#</td><td>Changes</td><td>Download</td></tr></thead><tbody>' + getTableRows(i.builds, i) + '</tbody></table>';
                     html += '</div></div>';
                     $('#content > .row').each(function (nr, i) {
