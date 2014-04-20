@@ -94,7 +94,7 @@ function getTableRows(builds, job, limit) {
     var nr = 0;
     $.each(builds, function (i, build) {
         if (nr++ > 10 && limit) return false;
-        html += '<tr class="' + getTableClass(build.result) + '"><td>' + build.number + '</td><td>' + formatChangeSet(build.changeSet.items) + '</td><td>' + getDownloadButton(build, job) + '</td></tr>';
+        html += '<tr class="' + getTableClass(build.result) + '"><td>' + build.fullDisplayName.replace(job.displayName + ' ', '') + '</td><td>' + formatChangeSet(build.changeSet.items) + '</td><td>' + getDownloadButton(build, job) + '</td></tr>';
     });
     return html;
 }
@@ -174,7 +174,7 @@ function getOverview() {
     if (loadFromExternal) {
         $.ajax({
             dataType: "json",
-            url: jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]]',
+            url: jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[fullDisplayName,number,result,description,changeSet[items[msg]]]]',
             success: function (data) {
                 $('#content').empty();
 
@@ -209,7 +209,7 @@ function getOverview() {
     } else {
         $.ajax({
             dataType: "json",
-            url: jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]]',
+            url: jenkinsPath + '/api/json?tree=jobs[name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[fullDisplayName,number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]]',
             success: function (data) {
                 $('#content').empty();
                 for (var i = 0; i < (data.jobs.length / 2); i++) {
@@ -253,7 +253,7 @@ function getHashSpecific(hashcode) {
     if (loadFromExternal) {
         $.ajax({
             dataType: "json",
-            url: jenkinsPath + '/job/' + hashcode + '/api/json?tree=name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[number,result,description,changeSet[items[msg]]]',
+            url: jenkinsPath + '/job/' + hashcode + '/api/json?tree=name,color,url,description,displayName,lastSuccessfulBuild[number,description],builds[fullDisplayName,number,result,description,changeSet[items[msg]]]',
             success: function (data) {
                 $('#content').empty();
 
@@ -286,7 +286,7 @@ function getHashSpecific(hashcode) {
     } else {
         $.ajax({
             dataType: "json",
-            url: jenkinsPath + '/job/' + hashcode + '/api/json?tree=name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]',
+            url: jenkinsPath + '/job/' + hashcode + '/api/json?tree=name,color,url,description,displayName,lastSuccessfulBuild[number,artifacts[fileName,relativePath]],builds[fullDisplayName,number,result,artifacts[fileName,relativePath],changeSet[items[msg]]]',
             success: function (data) {
                 $('#content').empty();
 
